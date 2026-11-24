@@ -1,0 +1,257 @@
+---
+import { site } from "../content/site";
+
+// Set PUBLIC_FORM_ENDPOINT (in .env or your host's settings) to collect RSVPs
+// with Formspree, Basin, a Supabase function or anything that accepts a form post.
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
+const guests = Array.from({ length: site.rsvp.maxGuests }, (_, i) => i + 1);
+---
+
+<form
+  class="rsvp reveal"
+  method="post"
+  action={endpoint || `mailto:${site.contactEmail}`}
+  enctype={endpoint ? "multipart/form-data" : "text/plain"}
+  data-endpoint={endpoint}
+  data-email={site.contactEmail}
+  data-couple={`${site.couple.first} and ${site.couple.second}`}
+>
+  {
+    !endpoint && (
+      <p class="notice" role="note">
+        Online RSVPs aren't switched on yet, so sending this form opens an email to{" "}
+        <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a> with your answers filled in.
+      </p>
+    )
+  }
+
+  <div class="row two">
+    <label>
+      <span>Full name</span>
+      <input name="name" autocomplete="name" required />
+    </label>
+    <label>
+      <span>Email</span>
+      <input name="email" type="email" autocomplete="email" required />
+    </label>
+  </div>
+
+  <fieldset class="attending">
+    <legend>Will you be there?</legend>
+    <label class="choice">
+      <input type="radio" name="attending" value="Joyfully accepts" required checked />
+      <span>Joyfully accepts</span>
+    </label>
+    <label class="choice">
+      <input type="radio" name="attending" value="Regretfully declines" />
+      <span>Regretfully declines</span>
+    </label>
+  </fieldset>
+
+  <div class="row two" data-if-attending>
+    <label>
+      <span>Number of guests, including you</span>
+      <select name="guests">
+        {guests.map((n) => <option value={n}>{n}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>Meal choice</span>
+      <select name="meal">
+        {site.rsvp.meals.map((m) => <option value={m.label}>{m.label}</option>)}
+      </select>
+    </label>
+  </div>
+
+  <label data-if-attending>
+    <span>A song that will get you dancing</span>
+    <input name="song" placeholder="Song and artist" />
+  </label>
+
+  <label>
+    <span>Dietary needs or a note for us (optional)</span>
+    <textarea name="note" rows="4"></textarea>
+  </label>
+
+  <label class="trap" aria-hidden="true">
+    <span>Leave this empty</span>
+    <input name="_gotcha" tabindex="-1" autocomplete="off" />
+  </label>
+
+  <div class="submit">
+    <button class="button" type="submit">Send RSVP</button>
+    <p class="status" role="status" aria-live="polite"></p>
+  </div>
+</form>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("form.rsvp");
+  if (form) {
+    const status = form.querySelector<HTMLElement>(".status")!;
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    const endpoint = form.dataset.endpoint ?? "";
+
+    // Hide guests, meal and song when someone can't come.
+    const sync = () => {
+      const coming = (form.elements.namedItem("attending") as RadioNodeList).value !== "Regretfully declines";
+      form.querySelectorAll<HTMLElement>("[data-if-attending]").forEach((el) => {
+        el.hidden = !coming;
+        el.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select").forEach((f) => (f.disabled = !coming));
+      });
+    };
+    form.addEventListener("change", sync);
+    sync();
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      if (data.get("_gotcha")) return;
+
+      if (!endpoint) {
+        // No endpoint set: open an email with the answers instead.
+        const lines: string[] = [];
+        data.forEach((value, key) => {
+          if (key !== "_gotcha" && String(value).trim()) lines.push(`${key[0].toUpperCase()}${key.slice(1)}: ${value}`);
+        });
+        const subject = `RSVP for ${form.dataset.couple}: ${data.get("name")}`;
+        window.location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
+        status.textContent = "Your email app should open with your RSVP ready to send.";
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = "Sending...";
+      try {
+        const res = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        sync();
+        status.textContent = "Thank you. Your RSVP is in, and we can't wait to see you.";
+      } catch {
+        status.textContent = `Something went wrong sending your RSVP. Please try again, or email us at ${form.dataset.email}.`;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .rsvp {
+    display: grid;
+    gap: 1.4rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: clamp(1.5rem, 5vw, 3rem);
+    border-radius: var(--radius);
+    box-shadow: 0 40px 80px -50px rgb(38 51 43 / 0.45);
+  }
+  .notice {
+    margin: 0;
+    padding: 0.9rem 1.1rem;
+    background: #f6ecdc;
+    border-left: 3px solid var(--gold);
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+  .row.two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.4rem;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  @media (max-width: 600px) {
+    .row.two {
+      grid-template-columns: 1fr;
+    }
+  }
+  label {
+    display: grid;
+    gap: 0.4rem;
+  }
+  label > span,
+  legend {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--forest);
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.75rem 0.9rem;
+    width: 100%;
+    min-width: 0;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--clay);
+    outline-offset: 1px;
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  legend {
+    width: 100%;
+    margin-bottom: 0.6rem;
+    float: left;
+  }
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    background: var(--paper);
+  }
+  .choice:has(input:checked) {
+    border-color: var(--forest);
+    background: #eaf0e6;
+  }
+  .choice input {
+    width: auto;
+    accent-color: var(--forest);
+    margin: 0;
+  }
+  .choice span {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+  }
+  .trap {
+    position: absolute;
+    left: -9999px;
+  }
+  .submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+  .status {
+    margin: 0;
+    color: var(--forest);
+    font-family: var(--display);
+    font-size: 1.2rem;
+    font-style: italic;
+  }
+</style>

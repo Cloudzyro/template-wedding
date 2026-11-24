@@ -1,0 +1,985 @@
+---
+import Base from "../layouts/Base.astro";
+import Art from "../components/Art.astro";
+import Flourish from "../components/Flourish.astro";
+import Rsvp from "../components/Rsvp.astro";
+import { site } from "../content/site";
+
+type ArtName = "arch" | "moon" | "sun" | "hills" | "flowers" | "dusk";
+
+const { couple } = site;
+---
+
+<Base title={site.title} description={site.description}>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="mark" href="#top" aria-label={`${couple.first} and ${couple.second}, back to top`}>
+        {couple.first[0]}<span>&amp;</span>{couple.second[0]}
+      </a>
+      <nav aria-label="Main">
+        <ul class="nav-list">
+          {site.nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        </ul>
+      </nav>
+      <a class="button nav-rsvp" href="#rsvp">RSVP</a>
+      <details class="menu">
+        <summary aria-label="Open menu">Menu</summary>
+        <ul>
+          {site.nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+          <li><a href="#rsvp">RSVP</a></li>
+        </ul>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <svg class="hero-vine left" viewBox="0 0 200 600" aria-hidden="true">
+        <path d="M150 0C60 120 170 240 90 360S110 560 60 600" />
+        {[60, 150, 240, 330, 420, 510].map((y, i) => (
+          <ellipse cx={i % 2 ? 140 : 80} cy={y} rx="26" ry="10" transform={`rotate(${i % 2 ? -35 : 35} ${i % 2 ? 140 : 80} ${y})`} />
+        ))}
+      </svg>
+      <svg class="hero-vine right" viewBox="0 0 200 600" aria-hidden="true">
+        <path d="M150 0C60 120 170 240 90 360S110 560 60 600" />
+        {[60, 150, 240, 330, 420, 510].map((y, i) => (
+          <ellipse cx={i % 2 ? 140 : 80} cy={y} rx="26" ry="10" transform={`rotate(${i % 2 ? -35 : 35} ${i % 2 ? 140 : 80} ${y})`} />
+        ))}
+      </svg>
+      <div class="wrap hero-inner">
+        <p class="eyebrow">Together with their families</p>
+        <h1>
+          <span class="name">{couple.first}</span>
+          <span class="amp" aria-hidden="true">&amp;</span>
+          <span class="sr-only">and</span>
+          <span class="name">{couple.second}</span>
+        </h1>
+        <p class="hero-sub">invite you to celebrate their wedding</p>
+        <p class="hero-date">
+          <time datetime={site.date}>{site.dateLabel}</time>
+        </p>
+        <p class="hero-place">{site.placeLabel}</p>
+
+        <div class="countdown" data-countdown={site.date} aria-live="off">
+          <p class="countdown-fallback">Counting down to {site.dateLabel}</p>
+          <ol class="countdown-units" hidden>
+            <li><span data-unit="days">0</span><small>Days</small></li>
+            <li><span data-unit="hours">0</span><small>Hours</small></li>
+            <li><span data-unit="minutes">0</span><small>Minutes</small></li>
+            <li><span data-unit="seconds">0</span><small>Seconds</small></li>
+          </ol>
+          <p class="countdown-done" hidden>We're married. Thank you for celebrating with us.</p>
+        </div>
+
+        <div class="hero-actions">
+          <a class="button" href="#rsvp">RSVP by {site.rsvpBy}</a>
+          <a class="button ghost" href="#schedule">See the day</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section story" id="story">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">How we got here</p>
+          <h2>Our story</h2>
+          <Flourish />
+          <p class="lede">{site.story.intro}</p>
+        </div>
+        <ol class="chapters">
+          {
+            site.story.chapters.map((c) => (
+              <li class="chapter reveal">
+                <p class="chapter-year">{c.year}</p>
+                <h3>{c.title}</h3>
+                <p>{c.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="section schedule" id="schedule">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">{site.dateLabel}</p>
+          <h2>The day</h2>
+          <Flourish />
+        </div>
+        <ol class="timeline">
+          {
+            site.schedule.map((item) => (
+              <li class="reveal">
+                <p class="time">{item.time}</p>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p class="place">{item.place}</p>
+                  <p>{item.detail}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="section travel" id="travel">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Getting there</p>
+          <h2>Venue and travel</h2>
+          <Flourish />
+        </div>
+
+        <div class="venue reveal">
+          <div class="venue-art">
+            <Art art="hills" id="venue" alt={`Illustration of the rolling hills around ${site.venue.name}`} />
+          </div>
+          <div class="venue-text">
+            <h3>{site.venue.name}</h3>
+            <address>{site.venue.address}</address>
+            <p>{site.venue.note}</p>
+            <p><strong>Parking.</strong> {site.venue.parking}</p>
+            <a class="button ghost" href={site.venue.mapUrl} rel="noopener" target="_blank">
+              Open in maps<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="travel-grid">
+          <div class="reveal">
+            <h3 class="small-head">Flying in</h3>
+            <ul class="plain">
+              {site.travel.airports.map((a) => <li><strong>{a.name}</strong><span>{a.distance}</span></li>)}
+            </ul>
+            <h3 class="small-head">Shuttles</h3>
+            <p>{site.travel.shuttle}</p>
+          </div>
+          <div class="hotels">
+            <h3 class="small-head reveal">Where to stay</h3>
+            {
+              site.travel.hotels.map((h) => (
+                <article class="hotel reveal">
+                  <div>
+                    <h4>{h.name}</h4>
+                    <p>{h.detail}</p>
+                    <p class="meta">
+                      {h.price} <span aria-hidden="true">·</span> {h.bookBy}
+                    </p>
+                  </div>
+                  <a href={h.url} rel="noopener" target="_blank">
+                    Book<span class="sr-only"> {h.name} (opens in a new tab)</span>
+                  </a>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section rsvp-section" id="rsvp">
+      <div class="wrap narrow">
+        <div class="section-head reveal">
+          <p class="eyebrow">Kindly reply by {site.rsvpBy}</p>
+          <h2>RSVP</h2>
+          <Flourish />
+          <p>We can't wait to celebrate with you. Let us know if you can make it, and what you'd like to eat.</p>
+        </div>
+        <Rsvp />
+      </div>
+    </section>
+
+    <section class="section registry" id="registry">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">With gratitude</p>
+          <h2>Registry</h2>
+          <Flourish />
+          <p>{site.registry.intro}</p>
+        </div>
+        <ul class="registry-list">
+          {
+            site.registry.links.map((r) => (
+              <li class="reveal">
+                <a href={r.url} rel="noopener" target="_blank">
+                  <span class="r-name">{r.name}</span>
+                  <span class="r-detail">{r.detail}</span>
+                  <span class="r-cta">
+                    View registry<span class="sr-only"> (opens in a new tab)</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="section gallery" id="gallery">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">A few favorite moments</p>
+          <h2>Gallery</h2>
+          <Flourish />
+        </div>
+        <ul class="gallery-grid">
+          {
+            site.gallery.map((g, i) => (
+              <li class="reveal">
+                <figure>
+                  <div class="frame">
+                    <Art art={g.art as ArtName} id={`gal-${i}`} alt={g.alt} />
+                  </div>
+                  <figcaption>{g.caption}</figcaption>
+                </figure>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="wrap narrow">
+        <div class="section-head reveal">
+          <p class="eyebrow">Good to know</p>
+          <h2>Questions</h2>
+          <Flourish />
+        </div>
+        <div class="faq-list">
+          {
+            site.faq.map((f) => (
+              <details class="reveal">
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+        <p class="faq-more">
+          Anything else? Write to us at <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="footer-names">{couple.first} <span>&amp;</span> {couple.second}</p>
+      <p>{site.dateLabel} <span aria-hidden="true">·</span> {site.placeLabel}</p>
+      <p class="hashtag">{couple.hashtag}</p>
+    </div>
+  </footer>
+</Base>
+
+<script>
+  // Live countdown. Without JavaScript, guests still see the plain date.
+  const box = document.querySelector<HTMLElement>("[data-countdown]");
+  if (box) {
+    const target = new Date(box.dataset.countdown ?? "").getTime();
+    const units = box.querySelector<HTMLElement>(".countdown-units");
+    const fallback = box.querySelector<HTMLElement>(".countdown-fallback");
+    const done = box.querySelector<HTMLElement>(".countdown-done");
+    const set = (name: string, value: number) => {
+      const el = box.querySelector(`[data-unit="${name}"]`);
+      if (el) el.textContent = String(value).padStart(2, "0");
+    };
+    const tick = () => {
+      const diff = target - Date.now();
+      if (Number.isNaN(target)) return;
+      fallback?.setAttribute("hidden", "");
+      if (diff <= 0) {
+        units?.setAttribute("hidden", "");
+        done?.removeAttribute("hidden");
+        return true;
+      }
+      units?.removeAttribute("hidden");
+      const s = Math.floor(diff / 1000);
+      set("days", Math.floor(s / 86400));
+      set("hours", Math.floor((s % 86400) / 3600));
+      set("minutes", Math.floor((s % 3600) / 60));
+      set("seconds", s % 60);
+    };
+    if (!tick()) {
+      const timer = setInterval(() => tick() && clearInterval(timer), 1000);
+    }
+  }
+
+  // Gentle fade-in as sections scroll into view.
+  const items = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px" },
+    );
+    items.forEach((el) => io.observe(el));
+  } else {
+    items.forEach((el) => el.classList.add("in"));
+  }
+
+  // Close the phone menu after choosing a section.
+  document.querySelectorAll<HTMLAnchorElement>(".menu a").forEach((a) =>
+    a.addEventListener("click", () => a.closest("details")?.removeAttribute("open")),
+  );
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Header */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 4.25rem;
+  }
+  .mark {
+    font-family: var(--display);
+    font-size: 1.7rem;
+    text-decoration: none;
+    color: var(--forest);
+    letter-spacing: 0.04em;
+  }
+  .mark span {
+    font-family: var(--script);
+    color: var(--gold);
+    margin: 0 0.15em;
+    font-size: 1.4rem;
+  }
+  .topbar nav {
+    margin-left: auto;
+  }
+  .nav-list {
+    display: flex;
+    gap: 1.6rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-list a {
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .nav-list a:hover {
+    color: var(--clay);
+  }
+  .nav-rsvp {
+    min-height: 2.5rem;
+    padding: 0.6rem 1.25rem;
+  }
+  .menu {
+    display: none;
+    margin-left: auto;
+    position: relative;
+  }
+  .menu summary {
+    list-style: none;
+    cursor: pointer;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu ul {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.6rem);
+    list-style: none;
+    margin: 0;
+    padding: 0.75rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 40px -20px rgb(38 51 43 / 0.35);
+    min-width: 13rem;
+  }
+  .menu a {
+    display: block;
+    padding: 0.55rem 0.75rem;
+    text-decoration: none;
+  }
+  @media (max-width: 900px) {
+    .topbar nav,
+    .nav-rsvp {
+      display: none;
+    }
+    .menu {
+      display: block;
+    }
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: clamp(3.5rem, 8vw, 6rem) 0 clamp(4rem, 8vw, 6rem);
+    background:
+      radial-gradient(60rem 30rem at 50% -10%, #fffaf0 0%, transparent 70%),
+      radial-gradient(40rem 30rem at 100% 100%, #e9dcc3 0%, transparent 60%),
+      var(--paper);
+  }
+  .hero-inner {
+    position: relative;
+  }
+  .hero-vine {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: clamp(90px, 16vw, 200px);
+    fill: var(--sage);
+    opacity: 0.35;
+  }
+  .hero-vine path {
+    fill: none;
+    stroke: var(--sage);
+    stroke-width: 2;
+  }
+  .hero-vine.left {
+    left: 0;
+  }
+  .hero-vine.right {
+    right: 0;
+    transform: scaleX(-1);
+  }
+  @media (max-width: 760px) {
+    .hero-vine {
+      display: none;
+    }
+  }
+  .hero h1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: clamp(3.6rem, 15vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+  }
+  .hero h1 .amp {
+    font-family: var(--script);
+    color: var(--gold);
+    font-size: 0.6em;
+    line-height: 1.25;
+  }
+  @media (min-width: 760px) {
+    .hero h1 {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.25em;
+      font-size: clamp(4.5rem, 9vw, 7.5rem);
+    }
+    .hero h1 .amp {
+      font-size: 0.7em;
+    }
+  }
+  .hero-sub {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(1.25rem, 3vw, 1.6rem);
+    color: var(--ink-soft);
+    margin: 1.5rem 0 0.75rem;
+  }
+  .hero-date {
+    font-size: 0.85rem;
+    letter-spacing: clamp(0.12em, 0.8vw, 0.3em);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--forest);
+    margin: 0;
+  }
+  .hero-place {
+    color: var(--ink-soft);
+    margin: 0.35rem 0 0;
+  }
+  .countdown {
+    margin: 2.25rem auto 2.25rem;
+  }
+  .countdown-fallback,
+  .countdown-done {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.35rem;
+    color: var(--forest);
+  }
+  .countdown-units {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-block: 1px solid var(--line);
+  }
+  .countdown-units[hidden] {
+    display: none;
+  }
+  .countdown-units li {
+    padding: 1rem clamp(0.75rem, 3vw, 2rem);
+    display: grid;
+  }
+  .countdown-units li + li {
+    border-left: 1px solid var(--line);
+  }
+  .countdown-units span {
+    font-family: var(--display);
+    font-size: clamp(2rem, 6vw, 3.25rem);
+    line-height: 1;
+    color: var(--forest);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .countdown-units small {
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 0.4rem;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    justify-content: center;
+  }
+
+  /* Story */
+  .story {
+    background: var(--card);
+  }
+  .lede {
+    font-family: var(--display);
+    font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+    line-height: 1.5;
+    color: var(--ink) !important;
+  }
+  .chapters {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 2.5rem 2rem;
+  }
+  .chapter {
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+  }
+  .chapter-year {
+    font-family: var(--script);
+    font-size: 2rem;
+    color: var(--gold);
+    margin: 0 0 0.25rem;
+    line-height: 1;
+  }
+  .chapter h3 {
+    font-size: 1.7rem;
+    margin-bottom: 0.6rem;
+  }
+  .chapter p:last-child {
+    color: var(--ink-soft);
+  }
+
+  /* Schedule */
+  .timeline {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 46rem;
+    position: relative;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 8.5rem;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    width: 1px;
+    background: var(--line);
+  }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 2rem;
+    padding: 0 0 2.5rem;
+    position: relative;
+  }
+  .timeline li::before {
+    content: "";
+    position: absolute;
+    left: calc(8.5rem - 5px);
+    top: 0.65rem;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1px solid var(--gold);
+  }
+  .time {
+    text-align: right;
+    font-family: var(--display);
+    font-size: 1.45rem;
+    color: var(--clay);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .timeline h3 {
+    font-size: 1.85rem;
+  }
+  .place {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 500;
+    margin: 0.3rem 0 0.4rem;
+  }
+  .timeline li p:last-child {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  @media (max-width: 600px) {
+    .timeline::before {
+      left: 5px;
+    }
+    .timeline li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+      padding-left: 2rem;
+    }
+    .timeline li::before {
+      left: 0;
+    }
+    .time {
+      text-align: left;
+    }
+  }
+
+  /* Travel */
+  .travel {
+    background: var(--paper-deep);
+  }
+  .venue {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+    margin-bottom: clamp(3rem, 7vw, 5rem);
+  }
+  .venue-art {
+    aspect-ratio: 4 / 4.2;
+    border-radius: 999px 999px var(--radius) var(--radius);
+    overflow: hidden;
+    border: 8px solid var(--card);
+    box-shadow: 0 30px 60px -35px rgb(38 51 43 / 0.45);
+  }
+  .venue-text h3 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+  }
+  address {
+    font-style: normal;
+    color: var(--clay);
+    margin: 0.4rem 0 1.25rem;
+  }
+  .travel-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+  .small-head {
+    font-family: var(--body);
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--forest);
+    margin: 0 0 1rem;
+  }
+  .small-head:not(:first-child) {
+    margin-top: 2rem;
+  }
+  .plain {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .plain li {
+    display: grid;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .plain span {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .hotel {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+    padding: 1.4rem 1.6rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+  }
+  .hotel h4 {
+    font-family: var(--display);
+    font-size: 1.55rem;
+    font-weight: 600;
+    color: var(--forest);
+    margin: 0 0 0.25rem;
+  }
+  .hotel p {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  .hotel .meta {
+    font-size: 0.85rem;
+    color: var(--clay);
+    margin-top: 0.4rem;
+  }
+  .hotel > a {
+    flex: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--forest);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .hotel > a:hover {
+    background: var(--forest);
+    color: var(--paper);
+  }
+  @media (max-width: 800px) {
+    .venue,
+    .travel-grid {
+      grid-template-columns: 1fr;
+    }
+    .venue-art {
+      max-width: 22rem;
+      margin-inline: auto;
+      width: 100%;
+    }
+  }
+  @media (max-width: 520px) {
+    .hotel {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  /* RSVP */
+  .narrow {
+    max-width: 46rem;
+  }
+  .rsvp-section {
+    background:
+      radial-gradient(40rem 20rem at 50% 0%, #fffaf0, transparent 70%),
+      var(--paper);
+  }
+
+  /* Registry */
+  .registry {
+    background: var(--forest);
+    color: var(--paper);
+  }
+  .registry h2,
+  .registry .section-head p {
+    color: var(--paper);
+  }
+  .registry .eyebrow {
+    color: #e8c98f;
+  }
+  .registry-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 1.25rem;
+  }
+  .registry-list a {
+    display: grid;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 2rem 1.75rem;
+    border: 1px solid rgb(247 241 230 / 0.3);
+    border-radius: var(--radius);
+    color: var(--paper);
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .registry-list a:hover {
+    background: rgb(247 241 230 / 0.08);
+    border-color: #e8c98f;
+  }
+  .registry-list a:focus-visible {
+    outline-color: #e8c98f;
+  }
+  .r-name {
+    font-family: var(--display);
+    font-size: 1.9rem;
+    line-height: 1.15;
+  }
+  .r-detail {
+    color: rgb(247 241 230 / 0.8);
+  }
+  .r-cta {
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8c98f;
+  }
+
+  /* Gallery */
+  .gallery-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 2.5vw, 2rem);
+  }
+  .gallery-grid li:nth-child(3n + 2) {
+    margin-top: 2.5rem;
+    margin-bottom: -2.5rem;
+  }
+  figure {
+    margin: 0;
+  }
+  .frame {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--paper-deep);
+    box-shadow: 0 24px 50px -32px rgb(38 51 43 / 0.5);
+  }
+  figcaption {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 0.8rem;
+  }
+  @media (max-width: 800px) {
+    .gallery-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .gallery-grid li:nth-child(n) {
+      margin: 0;
+    }
+  }
+  @media (max-width: 420px) {
+    .gallery-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* FAQ */
+  .faq {
+    background: var(--card);
+  }
+  .faq-list details {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq-list summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.3rem 0;
+    font-family: var(--display);
+    font-size: 1.5rem;
+    color: var(--forest);
+  }
+  .faq-list summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-list summary::after {
+    content: "+";
+    font-family: var(--body);
+    font-weight: 300;
+    color: var(--gold);
+    font-size: 1.5rem;
+    line-height: 1;
+    transition: transform 0.25s;
+  }
+  .faq-list details[open] summary::after {
+    transform: rotate(45deg);
+  }
+  .faq-list details p {
+    color: var(--ink-soft);
+    margin: 0 0 1.4rem;
+    max-width: 38rem;
+  }
+  .faq-more {
+    text-align: center;
+    margin-top: 2.5rem;
+    color: var(--ink-soft);
+  }
+
+  /* Footer */
+  .footer {
+    background: var(--paper-deep);
+    text-align: center;
+    padding: 4rem 0 3rem;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+  }
+  .footer-names {
+    font-family: var(--display);
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    color: var(--forest);
+    margin-bottom: 0.4rem;
+    line-height: 1.1;
+  }
+  .footer-names span {
+    font-family: var(--script);
+    color: var(--gold);
+    font-size: 0.8em;
+  }
+  .hashtag {
+    margin-top: 0.6rem;
+    letter-spacing: 0.18em;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--clay);
+  }
+</style>
